@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" layout:decorate="~{layout}">
+<div layout:fragment="content">
+    <form th:action="@{/signup}" th:object="${memberForm}" method="post">
+        <input type="text" name="loginId" class="input" th:field="*{loginId}" placeholder="아이디">
+        <p th:if="${#fields.hasErrors('loginId')}" th:errors="*{loginId}"></p>
+        <input type="password" name="password" class="input" placeholder="비밀번호">
+        <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+        <input type="text" name="nickname" class="input" th:field="*{nickname}" placeholder="닉네임">
+        <p th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></p>
+        <input type="text" name="email" class="input" th:field="*{email}" placeholder="이메일">
+        <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+        <input type="submit" class="btn" value="회원가입">
+    </form>
+</div>
+</html>
