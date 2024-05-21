@@ -9,7 +9,7 @@
     <div class="bg-blue-300">
         <a href="/">logo</a>
     </div>
-    <div class="bg-red-600 flex">
+    <div class="flex">
         <div class="bg-blue-200 w-[20%]">
             <ul class="menu h-[100%] overflow-scroll">
                 <li th:each="notebook : ${notebookList}" th:with="basic='w-[90%] p-[10px]'">
@@ -77,7 +77,7 @@
         </div>
 
 
-        <div class="bg-sky-100 w-[60%]">
+        <div class="w-[60%]">
             <form th:action="@{|/books/${targetNotebook.id}/notes/${targetNote.id}/update|}" method="post" id="updateForm">
                 <div>
                     <input type="hidden" name="id" th:value="${targetNote.id}">
@@ -85,9 +85,8 @@
                 <div>
                     <input type="text" name="title" th:value="${targetNote.title}">
                 </div>
-                <div>
-                    <textarea name="content" cols="30" rows="10" th:text="${targetNote.content}"></textarea>
-                </div>
+                <input type="hidden" name="content" id="editor-body">
+                <div id="editor"></div>
                 <div>
                     <input type="button" value="수정" onclick="updateForm();">
                 </div>
@@ -98,20 +97,35 @@
             </form>
         </div>
     </div>
+    <script th:inline="javascript">
+        const Editor = toastui.Editor;
+        const editor = new Editor({
+            el: document.querySelector('#editor'),
+            height: '700px',
+            initialEditType: 'markdown',
+            previewStyle: 'vertical',
+            initialValue: [[${targetNote.content}]]
+        });
+
+        editor.getMarkdown();
+    </script>
+    <script>
+        function updateForm() {
+            const form = document.getElementById("updateForm");
+            const editorBody = document.getElementById("editor-body");
+            if (confirm("수정하시겠습니까?")) {
+                const text = editor.getMarkdown();
+                editorBody.value = text;
+                form.submit();
+            }
+        }
+        function deleteForm() {
+            const form = document.getElementById("deleteForm");
+            if (confirm("삭제하시겠습니까?")) {
+                form.submit();
+            }
+        }
+    </script>
 </div>
 </body>
-<script>
-    function updateForm() {
-        const form = document.getElementById("updateForm");
-        if (confirm("수정하시겠습니까?")) {
-            form.submit();
-        }
-    }
-    function deleteForm() {
-        const form = document.getElementById("deleteForm");
-        if (confirm("삭제하시겠습니까?")) {
-            form.submit();
-        }
-    }
-</script>
 </html>
