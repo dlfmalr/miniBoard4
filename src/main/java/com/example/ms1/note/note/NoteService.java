@@ -40,4 +40,7 @@ public class NoteService {
     }
 
 
+    public List<Note> getSearchedNoteList(String keyword) {
+        return noteRepository.findByTitleContaining(keyword);
+    }
 }

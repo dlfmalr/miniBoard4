@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface NotebookRepository extends JpaRepository<Notebook, Long> {
     List<Notebook> findByParentNull();
+
+    List<Notebook> findByNameContaining(String keyword);
 }
