@@ -33,4 +33,16 @@ public class NotebookService {
 
         notebookRepository.save(notebook);
     }
+
+    public List<Notebook> getTopNotebookList() {
+        return notebookRepository.findByParentNull();
+    }
+
+    public void move(Long id, Long destinationId) {
+        Notebook target = getNotebook(id);
+        Notebook destination = getNotebook(destinationId);
+
+        target.setParent(destination);
+        notebookRepository.save(target);
+    }
 }

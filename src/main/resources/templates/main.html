@@ -1,6 +1,50 @@
 <!DOCTYPE html>
 <html lang="ko" layout:decorate="~{layout}">
 <body>
+<li th:fragment="noteTree(notebookList, targetNotebook)"
+    th:each="notebook : ${notebookList}" th:with="basic='w-[90%] p-[10px]'">
+    <th:block th:if="${!#lists.isEmpty(notebook.children)}">
+        <details open>
+            <summary class="flex p-0"><a th:class="${basic}"
+                                         th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-300' : ''"
+                                         th:href="@{|/books/${notebook.id}|}"
+                                         th:text="${notebook.name}"></a></summary>
+            <ul>
+                <li th:replace="main::noteTree(${notebook.children}, ${targetNotebook})"></li>
+            </ul>
+        </details>
+    </th:block>
+    <th:block th:if="${#lists.isEmpty(notebook.children)}">
+        <a th:class="${basic}"
+           th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-300' : ''"
+           th:href="@{|/books/${notebook.id}|}" th:text="${notebook.name}"></a>
+    </th:block>
+</li>
+<li th:fragment="moveTree(notebookList, targetNotebook)"
+    th:each="notebook : ${notebookList}" th:with="basic='w-[90%] p-[10px]'">
+    <th:block th:if="${!#lists.isEmpty(notebook.children)}">
+        <details open th:if="${notebook.id != targetNotebook.id and !#lists.contains(targetNotebook.children, notebook)}">
+            <summary class="flex p-0">
+                <input type="radio" name="destinationId" th:value="${notebook.id}">
+                <a th:class="${basic}"
+                   th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-300' : ''"
+                   href="javascript:void(0)"
+                   th:text="${notebook.name}"></a>
+            </summary>
+            <ul>
+                <li th:replace="main::moveTree(${notebook.children}, ${targetNotebook})"></li>
+            </ul>
+        </details>
+    </th:block>
+    <th:block th:if="${#lists.isEmpty(notebook.children)}">
+        <div th:if="${notebook.id != targetNotebook.id and !#lists.contains(targetNotebook.children, notebook)}">
+            <input type="radio" name="destinationId" th:value="${notebook.id}">
+            <a th:class="${basic}"
+               th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-300' : ''"
+               href="javascript:void(0)" th:text="${notebook.name}"></a>
+        </div>
+    </th:block>
+</li>
 <div layout:fragment="content"
      th:with="notebookList=${mainDataDto.notebookList},
         noteList=${mainDataDto.noteList},
@@ -12,40 +56,18 @@
     <div class="flex">
         <div class="bg-blue-200 w-[20%]">
             <ul class="menu h-[100%] overflow-scroll">
-                <li th:each="notebook : ${notebookList}" th:with="basic='w-[90%] p-[10px]'">
-                    <th:block th:if="${!#lists.isEmpty(notebook.children)}">
-                        <details open>
-                            <summary class="flex p-0"><a th:class="${basic}"
-                                                         th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-300' : ''"
-                                                         th:href="@{|/books/${notebook.id}|}"
-                                                         th:text="${notebook.name}"></a></summary>
-                            <ul>
-                                <li th:each="child : ${notebook.children}">
-                                    <a th:class="${basic}"
-                                       th:classappend="${child.id == targetNotebook.id} ? 'bg-blue-300' : ''"
-                                       th:href="@{|/books/${child.id}|}" th:text="${child.name}"></a>
-                                </li>
-                            </ul>
-                        </details>
-                    </th:block>
-                    <th:block th:if="${#lists.isEmpty(notebook.children) and notebook.parent == null}">
-                        <a th:class="${basic}"
-                           th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-300' : ''"
-                           th:href="@{|/books/${notebook.id}|}" th:text="${notebook.name}"></a>
-                    </th:block>
-                </li>
+                <li th:replace="main::noteTree(${notebookList}, ${targetNotebook})"></li>
             </ul>
 
             <form th:action="@{|/books/write|}" method="post">
-                <input type="submit" value="추가">
+                <input type="submit" class="btn" value="추가">
             </form>
             <form th:action="@{|/groups/${targetNotebook.id}/books/write|}" method="post">
-                <input type="submit" value="하위 노트북 추가">
+                <input type="submit" class="btn" value="하위 노트북 추가">
             </form>
             <form th:action="@{|/books/${targetNotebook.id}/delete|}" method="post">
                 <input type="submit" class="btn" value="삭제">
             </form>
-
             <!-- You can open the modal using ID.showModal() method -->
             <button class="btn" onclick="my_modal_3.showModal()">노트북 이름 수정</button>
             <dialog id="my_modal_3" class="modal">
@@ -63,6 +85,26 @@
 
             <a href="/signup" class="btn">회원가입</a>
             <a href="/logout" class="btn">로그아웃</a>
+
+            <!-- Open the modal using ID.showModal() method -->
+            <button class="btn" onclick="my_modal_1.showModal()">노트 이동</button>
+            <dialog id="my_modal_1" class="modal">
+                <div class="modal-box">
+                    <form th:action="@{|/books/${targetNotebook.id}/move|}" method="post">
+                        <ul class="menu h-[100%] overflow-scroll">
+                            <li th:replace="main::moveTree(${notebookList}, ${targetNotebook})"></li>
+                        </ul>
+                        <input type="hidden" name="targetNoteId" th:value="${targetNote.id}">
+                        <input type="submit" class="btn" value="이동">
+                    </form>
+                    <div class="modal-action">
+                        <form method="dialog">
+                            <!-- if there is a button in form, it will close the modal -->
+                            <button class="btn">Close</button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
         </div>
         <div class="bg-sky-100 w-[20%] h-[800px] text-center ">
             <ul class="h-[100%] overflow-scroll">
